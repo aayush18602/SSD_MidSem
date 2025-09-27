@@ -8,7 +8,7 @@ const lectureSchema = new mongoose.Schema({
         ref: "Question"
     }
   ]
-}, { collection: "Lectures" });
+}, { collection: "Lectures",timestamps: true });
 
 const Lecture = mongoose.model("Lecture", lectureSchema);
 
