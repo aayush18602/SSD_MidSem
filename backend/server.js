@@ -5,10 +5,12 @@ import dotenv from 'dotenv';
 import connectDB from "./db.js";
 import router from "./routes/courseRoute.js";
 import userRouter from "./routes/userRoute.js";
+import cors from "cors"
 
 dotenv.config();
 
 const app = express();
+app.use(cors());
 const port = process.env.PORT || 3000;
 app.use(express.json());
 connectDB();
