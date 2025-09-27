@@ -21,7 +21,7 @@ const io = new Server(server, {
 
 app.set("io", io);
 
-app.use('',router)
+app.use('/api',router)
 
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
