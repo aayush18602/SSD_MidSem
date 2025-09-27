@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema (
         courses: [
             { 
                 type: mongoose.Schema.Types.ObjectId, 
-                ref: "Courses" 
+                ref: "Course" 
             }
         ],
   },
@@ -34,4 +34,4 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
 
 const User = mongoose.model("User", userSchema);
 
-module.exports = User;
+export default User;

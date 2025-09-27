@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import dotenv from 'dotenv';
 import connectDB from "./db.js";
 import router from "./routes/courseRoute.js";
+import userRouter from "./routes/userRoute.js";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ const io = new Server(server, {
 app.set("io", io);
 
 app.use('/api',router)
+app.use('/auth', userRouter)
 
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
