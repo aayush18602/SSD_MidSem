@@ -3,6 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import dotenv from 'dotenv';
 import connectDB from "./db.js";
+import router from "./routes/courseRoute.js";
 
 dotenv.config();
 
@@ -20,9 +21,7 @@ const io = new Server(server, {
 
 app.set("io", io);
 
-app.get('/',(req,res)=>{
-    res.send("Hello world")
-})
+app.use('',router)
 
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
