@@ -1,5 +1,10 @@
 import React from "react";
+import { useNavigate  } from 'react-router-dom';
 const Course = ({ course }) => {
+    const navigate = useNavigate();
+    const handleClick = () => {
+        navigate('/course/' + course.id);
+    }
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer group">
       {/* Course Image */}
@@ -22,7 +27,7 @@ const Course = ({ course }) => {
         </p>
         
         {/* Action Button */}
-        <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 font-medium">
+        <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 font-medium" onClick={handleClick}>
           Continue Learning
         </button>
       </div>
