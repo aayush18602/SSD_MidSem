@@ -1,6 +1,7 @@
+import { useDispatch, useSelector } from "react-redux";
+import { updateQuestionStatus, deleteQuestion } from "../reducers/questionsSlice";
 import ActionButtons from "./ActionButtons";
 
-// Accent colors (vibrant set prioritized: pink, purple, red, blue, with bright companions)
 const ACCENT_KEYS = [
   "pink",
   "purple",
@@ -110,35 +111,60 @@ function truncate(str, n = 12) {
 }
 
 export default function Card({ item, isGridView = false }) {
+  const dispatch = useDispatch();
   const accentKey = pickAccentKey(item._id || item.question);
   const accent = ACCENTS[accentKey];
+  const user = useSelector((state) => state.user);
+
+  const handleDelete = () => {
+    dispatch(deleteQuestion(item.questionId));
+  };
+
+  const handleAnswered = () => {
+    dispatch(updateQuestionStatus({ questionId: item.questionId, status: "answered" }));
+  };
+
+  const handleImportant = () => {
+    const newStatus = item.status === "important" ? "unanswered" : "important";
+    dispatch(updateQuestionStatus({ questionId: item.questionId, status: newStatus }));
+  };
+
+  const role = "instructor"; // Change this to "instructor" to see instructor view
 
   return (
     <div
-      className={`overflow-hidden w-full flex flex-col rounded-2xl border shadow-sm ${accent.background} ${accent.border} ${isGridView ? 'h-64' : ''}`}
+      className={`overflow-hidden w-full flex flex-col rounded-2xl border shadow-sm ${
+        accent.background
+      } ${accent.border} ${isGridView ? "h-64" : ""}`}
       role="group"
       aria-label="kanban-card"
     >
       {/* Question */}
-      <section className={`flex-1 p-4 overflow-auto min-h-0 ${accent.background}`}>
-        <p className={`text-base leading-snug ${accent.questionText}`}>{item.question}</p>
+      <section
+        className={`flex-1 p-4 overflow-auto min-h-0 ${accent.background}`}
+      >
+        <p className={`text-base leading-snug ${accent.questionText}`}>
+          {item.question}
+        </p>
       </section>
 
       {/* Other Info */}
-      <section
-        className={`h-14 flex-shrink-0 px-4 py-2 text-xs flex items-center justify-between ${accent.section}`}
-      >
-        <div className="min-w-0 flex flex-col justify-start items-start">
-          <span className="truncate">by {truncate(item.authorName, 20)}</span>
-        </div>
-        <ActionButtons
-          accentKey={accentKey}
-          status={item.status}
-          onDelete={() => {}}
-          onAnswered={() => {}}
-          onImportant={() => {}}
-        />
-      </section>
+      {user.role === "instructor" && (
+        <section
+          className={`h-14 flex-shrink-0 px-4 py-2 text-xs flex items-center justify-between ${accent.section}`}
+        >
+          <div className="min-w-0 flex flex-col justify-start items-start">
+            <span className="truncate">by {truncate(item.authorName, 20)}</span>
+          </div>
+          <ActionButtons
+            accentKey={accentKey}
+            status={item.status}
+            onDelete={handleDelete}
+            onAnswered={handleAnswered}
+            onImportant={handleImportant}
+          />
+        </section>
+      )}
     </div>
   );
 }
