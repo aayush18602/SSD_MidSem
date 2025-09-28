@@ -1,6 +1,7 @@
 import Course from "../models/Courses.js";
 import Lecture from "../models/Lectures.js";
 import User from "../models/User.js";
+import Question from "../models/Question.js";
 
 
 export async function getAllCourses(req,res){
@@ -98,4 +99,34 @@ export async function getCoursesById(req,res) {
     );
 
     return res.status(201).json(coursesWithInstructor);
+}
+
+export async function getQuestionForLecture(req,res){
+  const { lectureId } = req.params;
+  const ques = await Lecture.findById(lectureId).populate({
+        path: "questions",
+      });
+
+  return res.status(201).json(ques);
+}
+
+export async function createQuestion(req,res){
+  const { lectureId } = req.params;
+  const {quesObj} = req.body;
+  const ques = new Question(quesObj);
+  await ques.save();
+  const lecture = await Lecture.findById(lectureId);
+        
+  lecture.questions.push(ques._id);
+  await lecture.save(); 
+  return res.status(201).json(ques);
+}
+
+export async function updateQuestion(req,res){
+  const { quesId } = req.params;
+  const {status} = req.body;
+  const ques = await Question.findByIdAndUpdate(quesId,{
+    $set: {status:status}
+  },{new:true});
+  return res.status(201).json(ques);
 }
