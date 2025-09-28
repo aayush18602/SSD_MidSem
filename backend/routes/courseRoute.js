@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllCourses,getAllLectures, createLectureForCourse, deleteLectureFromCourse, getCoursesById,getQuestionForLecture,createQuestion,updateQuestion,deleteQuestion } from "../controllers/courseController.js"; 
+import { getAllCourses,getAllLectures, createLectureForCourse, deleteLectureFromCourse, getCoursesById,getQuestionForLecture,createQuestion,updateQuestion,deleteQuestion, pinnedQuestion } from "../controllers/courseController.js"; 
 import {protect} from '../middleware/authMiddleware.js'
 const router = express.Router();
 
@@ -18,4 +18,5 @@ router.post('/updateQues/:quesId',protect,updateQuestion)
 
 router.post('/deleteQues/:quesId',protect,deleteQuestion)
 
+router.post('/pinnedQues/:quesId',protect,pinnedQuestion)
 export default router;

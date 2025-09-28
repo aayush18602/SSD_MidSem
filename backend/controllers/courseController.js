@@ -136,3 +136,12 @@ export async function deleteQuestion(req,res){
   const ques = await Question.findByIdAndDelete(quesId);
   return res.status(201).json(ques);
 }
+
+export async function pinnedQuestion(req,res){
+  const { quesId } = req.params;
+  const {isPinned} = req.body;
+  const ques = await Question.findByIdAndUpdate(quesId,{
+    $set: {isPinned:isPinned}
+  },{new:true});
+  return res.status(201).json(ques);
+}
