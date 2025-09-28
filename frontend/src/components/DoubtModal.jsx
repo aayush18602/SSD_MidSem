@@ -39,10 +39,10 @@ export default function DoubtModal({
   };
 
   // Handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     doubtText = doubtText.trim();
     try {
-      const response = axios({
+      const response = await axios({
         method: "POST",
         url: "http://localhost:3000/api/getQues/" + lectureId,
         headers: {
@@ -57,19 +57,21 @@ export default function DoubtModal({
             authorName: user.fname,
             createdAt: new Date(),
             answeredAt: null,
+            isPinned: false
           }
         },
       })
       const data = response.data;
       console.log(data);
       const updatedQ = {
-        _id: data._id,
+        questionId: data._id,
         question: data.content,
         authorName: data.authorName,
         authorId: data.authorId,
         status: data.status,
         createdOn: data.createdAt ? data.createdAt : new Date().toISOString(),
         answeredOn: data.answeredAt ? data.answeredAt : new Date().toISOString(),
+        isPinned: data.isPinned? data.isPinned : false
       };
       dispatch(updateQuestion(updatedQ));
     } catch (error) {

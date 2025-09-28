@@ -72,7 +72,7 @@ export default function Doubts() {
   const [activeView, setActiveView] = useState("kanban");
 
   // Load demo data into Redux store on component mount
-  useEffect(()=> {
+  useEffect(async ()=> {
     // dispatch(setQuestions(demoData));
     // dispatch(resetQuestions()); // clear previous questions
     // socket.emit("joinLecture", lectureId);
@@ -107,7 +107,7 @@ export default function Doubts() {
     //   dispatch(updateQuestion(updatedQ));
     // })
     try {
-      const response = axios({
+      const response = await axios({
         method: 'GET',
         url: `http://localhost:3000/api/getQues/${lectureId}`,
         headers: {
@@ -115,14 +115,16 @@ export default function Doubts() {
         }
       });
       const data = response.data;
+      console.log(data);
       const questions = data.questions.map((q) => ({
-        _id: q._id,
+        questionId: q._id,
         question: q.content,
         authorName: q.authorName,
         authorId: q.authorId,
         status: q.status,
         createdOn: q.createdAt ? q.createdAt : new Date().toISOString(),
         answeredOn: q.answeredAt ? q.answeredAt : new Date().toISOString(),
+        isPinned: q.isPinned? q.isPinned : false
       }));
       dispatch(setQuestions(questions));
     } catch (error) {
@@ -142,7 +144,7 @@ export default function Doubts() {
       case "notimportant":
         return questions.filter((item) => item.status !== "important");
       case "userasked":
-        return questions.filter((item) => item.authorId === user.id);
+        return questions.filter((item) => item.authorId === user._id);
       default:
         return questions;
     }

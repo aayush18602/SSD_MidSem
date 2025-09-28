@@ -1,6 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
 import { updateQuestionStatus, deleteQuestion } from "../reducers/questions";
 import ActionButtons from "./ActionButtons";
+import axios from "axios";
+import { useEffect } from "react";
 
 const ACCENT_KEYS = [
   "pink",
@@ -116,17 +118,66 @@ export default function Card({ item, isGridView = false }) {
   const accent = ACCENTS[accentKey];
   const user = useSelector((state) => state.user);
 
-  const handleDelete = () => {
-    dispatch(deleteQuestion(item.questionId));
+  const handleDelete = async() => {
+    try{
+      console.log(item);
+      const response = await axios({
+        method: "POST",
+        url: `http://localhost:3000/api/deleteQues/` + item.questionId,
+        headers: {
+          "Authorization": `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+        },
+        data: {},
+      })
+      const data = response.data;
+      dispatch(deleteQuestion(item.questionId));
+    }
+    catch(err){
+      console.log(err);
+    }
   };
 
-  const handleAnswered = () => {
-    dispatch(updateQuestionStatus({ questionId: item.questionId, status: "answered" }));
+  const handleAnswered = async () => {
+    // const newStatus = item.status === "important" ? "important" : "answered";
+    const newStatus = "answered";
+    try{
+      console.log(item);
+      const response = await axios({
+        method: "POST",
+        url: `http://localhost:3000/api/updateQues/` + item.questionId,
+        headers: {
+          "Authorization": `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+        },
+        data: { status: newStatus },
+      })
+      const data = response.data;
+      dispatch(updateQuestionStatus({ questionId: item.questionId, status: newStatus }));
+    }
+    catch(err){
+      console.log(err);
+    }
   };
 
-  const handleImportant = () => {
+  const handleImportant = async() => {
     const newStatus = item.status === "important" ? "unanswered" : "important";
-    dispatch(updateQuestionStatus({ questionId: item.questionId, status: newStatus }));
+    try{
+      const response = await axios({
+        method: "POST",
+        url: `http://localhost:3000/api/updateQues/` + item.questionId,
+        headers: {
+          "Authorization": `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+        },
+        data: { status: newStatus },
+      })
+      const data = response.data;
+      dispatch(updateQuestionStatus({ questionId: item.questionId, status: newStatus }));
+    }
+    catch(err){
+      console.log(err);
+    }
   };
 
   return (

@@ -10,7 +10,7 @@ import questionsReducer from './reducers/questions.js'
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['user', 'course'], // only user will be persisted
+  // whitelist: ['user', 'course'], // only user will be persisted
 }
 const rootReducer = combineReducers({
   user: userReducer,
