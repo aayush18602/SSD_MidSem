@@ -92,9 +92,18 @@ export default function Doubts() {
     if (user.role === "student") {
       return (
         <div className="h-full grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Column title="Your Doubts" items={getFilteredData("userasked")} />
-          <Column title="All" items={getFilteredData("notimportant")} />
-          <Column title="Important" items={getFilteredData("important")} />
+          <Column
+            title="Your Doubts"
+            items={getFilteredData("userasked")}
+          />
+          <Column
+            title="All"
+            items={getFilteredData("notimportant")}
+          />
+          <Column
+            title="Important"
+            items={getFilteredData("important")}
+          />
         </div>
       );
     }
@@ -136,7 +145,10 @@ export default function Doubts() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 overflow-hidden">
-      <Header activeView={activeView} onViewChange={setActiveView} />
+      <Header
+        activeView={activeView}
+        onViewChange={setActiveView}
+      />
       <main className="h-[90vh] p-6 overflow-hidden">{renderContent()}</main>
     </div>
   );
