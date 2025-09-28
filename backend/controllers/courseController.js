@@ -132,9 +132,25 @@ export async function updateQuestion(req,res){
 }
 
 export async function deleteQuestion(req,res){
-  const { quesId } = req.params;
-  const ques = await Question.findByIdAndDelete(quesId);
-  return res.status(201).json(ques);
+  try {
+    const { quesId } = req.params;
+    const {lectureId} = req.body;
+
+    const ques = await Question.findByIdAndDelete(quesId);
+    if (!ques) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+    await Lecture.findByIdAndUpdate(
+      lectureId,
+      { $pull: { questions: quesId } },
+      { new: true }
+    );
+
+    return res.status(200).json({ message: "Question deleted successfully", ques });
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
 }
 
 export async function pinnedQuestion(req,res){
