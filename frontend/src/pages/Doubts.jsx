@@ -5,6 +5,7 @@ import { demoData } from "../data";
 import Card from "../components/Card";
 import Header from "../components/Header";
 import socket from "../socket";
+import axios from "axios";
 
 function Column({ title, items = [] }) {
   return (
@@ -74,11 +75,47 @@ export default function Doubts() {
   useEffect(()=> {
     // dispatch(setQuestions(demoData));
     // dispatch(resetQuestions()); // clear previous questions
-    socket.emit("joinLecture", lectureId);
+    // socket.emit("joinLecture", lectureId);
 
-    socket.on("getLectureQuestions", (data) => {
-      // change the data format to match the redux store
-      data.questions = data.questions.map((q) => ({
+    // socket.on("getLectureQuestions", (data) => {
+    //   // change the data format to match the redux store
+    //   data.questions = data.questions.map((q) => ({
+    //     _id: q._id,
+    //     question: q.content,
+    //     authorName: q.authorName,
+    //     authorId: q.authorId,
+    //     status: q.status,
+    //     createdOn: q.createdAt ? q.createdAt : new Date().toISOString(),
+    //     answeredOn: q.answeredAt ? q.answeredAt : new Date().toISOString(),
+    //   }));
+
+
+    //   dispatch(setQuestions(data.questions));
+    // });
+    
+    // socket.on("getUpdatedQuestion", (data) => {
+    //   console.log("Received updated question:", data);
+    //   const updatedQ = {
+    //     _id: data._id,
+    //     question: data.content,
+    //     authorName: data.authorName,
+    //     authorId: data.authorId,
+    //     status: data.status,
+    //     createdOn: data.createdAt ? data.createdAt : new Date().toISOString(),
+    //     answeredOn: data.answeredAt ? data.answeredAt : new Date().toISOString(),
+    //   };
+    //   dispatch(updateQuestion(updatedQ));
+    // })
+    try {
+      const response = axios({
+        method: 'GET',
+        url: `http://localhost:3000/api/getQues/${lectureId}`,
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      const data = response.data;
+      const questions = data.questions.map((q) => ({
         _id: q._id,
         question: q.content,
         authorName: q.authorName,
@@ -87,25 +124,11 @@ export default function Doubts() {
         createdOn: q.createdAt ? q.createdAt : new Date().toISOString(),
         answeredOn: q.answeredAt ? q.answeredAt : new Date().toISOString(),
       }));
-
-
-      dispatch(setQuestions(data.questions));
-    });
-    
-    socket.on("getUpdatedQuestion", (data) => {
-      console.log("Received updated question:", data);
-      const updatedQ = {
-        _id: data._id,
-        question: data.content,
-        authorName: data.authorName,
-        authorId: data.authorId,
-        status: data.status,
-        createdOn: data.createdAt ? data.createdAt : new Date().toISOString(),
-        answeredOn: data.answeredAt ? data.answeredAt : new Date().toISOString(),
-      };
-      dispatch(updateQuestion(updatedQ));
-    })
-  }, [dispatch]);
+      dispatch(setQuestions(questions));
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
 
   // Filter data based on status
   const getFilteredData = (filterType) => {

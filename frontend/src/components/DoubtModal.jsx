@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import socket from "../socket";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
+import { updateQuestion } from "../reducers/questions";
+// import {us}
 
 export default function DoubtModal({
   isOpen,
@@ -9,6 +12,7 @@ export default function DoubtModal({
   setDoubtText,
 }) {
   const lectureId = useSelector((state) => state.questions.lecture_id);
+  const dispatch = useDispatch();
   useEffect(() => {
     console.log("Lecture ID in Modal:", lectureId);
   }, [lectureId]);
@@ -37,19 +41,40 @@ export default function DoubtModal({
   // Handle form submission
   const handleSubmit = () => {
     doubtText = doubtText.trim();
-
-    socket.emit("createQuestion", {
-      lectureId: lectureId,
-      quesObj:{
-        content: doubtText,
-        status: "unanswered",
-        authorId: user._id,
-        authorName: user.fname,
-        createdAt: new Date(),
-        answeredAt: null,
-      }
-      
-    });
+    try {
+      const response = axios({
+        method: "POST",
+        url: "http://localhost:3000/api/getQues/" + lectureId,
+        headers: {
+          "Authorization": `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+        },
+        data: {
+          quesObj: {
+            content: doubtText,
+            status: "unanswered",
+            authorId: user._id,
+            authorName: user.fname,
+            createdAt: new Date(),
+            answeredAt: null,
+          }
+        },
+      })
+      const data = response.data;
+      console.log(data);
+      const updatedQ = {
+        _id: data._id,
+        question: data.content,
+        authorName: data.authorName,
+        authorId: data.authorId,
+        status: data.status,
+        createdOn: data.createdAt ? data.createdAt : new Date().toISOString(),
+        answeredOn: data.answeredAt ? data.answeredAt : new Date().toISOString(),
+      };
+      dispatch(updateQuestion(updatedQ));
+    } catch (error) {
+      console.error(error);
+    }
 
 
     // Reset form and close modal

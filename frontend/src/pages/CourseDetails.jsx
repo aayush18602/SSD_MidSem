@@ -3,8 +3,7 @@ import { useParams } from "react-router-dom";
 import Lecture from "../components/Lecture.jsx";
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Plus, X, Calendar, Clock, User } from "lucide-react";
-import { useSelector, useDispatch } from "react-redux";
-import { setCourseDetails } from "../reducers/course.js";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import Navbar from "../components/Navbar.jsx";
 import Loading from "../components/Loading.jsx";
@@ -14,7 +13,6 @@ const CourseDetails = () => {
     const navigate = useNavigate();
     const currentUser = useSelector((state) => state.user);
     const course = useSelector((state) => state.course);
-    const dispatch = useDispatch();
 
     const [lectures, setLectures] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -75,7 +73,7 @@ const CourseDetails = () => {
         e.preventDefault();
         
         // Validation
-        if (!newLecture.name || !newLecture.date || !newLecture.duration) {
+        if (!newLecture.name) {
             alert("Please fill in all required fields");
             return;
         }
@@ -98,7 +96,7 @@ const CourseDetails = () => {
             setLectures(prev => [...prev, createdLecture]);
             
             // Reset form and close modal
-            setNewLecture({ name: "", date: "", duration: "", description: "" });
+            setNewLecture({ name: ""});
             setShowAddLectureModal(false);
             
         } catch (error) {
@@ -112,7 +110,7 @@ const CourseDetails = () => {
 
     const closeModal = () => {
         setShowAddLectureModal(false);
-        setNewLecture({ name: "", date: "", duration: "", description: "" });
+        setNewLecture({ name: ""});
     };
 
     // Get today's date in YYYY-MM-DD format for date input min value
@@ -239,7 +237,7 @@ const CourseDetails = () => {
                                 />
                             </div>
 
-                            {/* Date */}
+                            {/* Date
                             <div>
                                 <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
                                     <Calendar className="w-4 h-4 inline mr-1" />
@@ -255,10 +253,10 @@ const CourseDetails = () => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     required
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Duration */}
-                            <div>
+                            {/* <div>
                                 <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
                                     <Clock className="w-4 h-4 inline mr-1" />
                                     Duration *
@@ -278,10 +276,10 @@ const CourseDetails = () => {
                                     <option value="90 min">1.5 hours</option>
                                     <option value="120 min">2 hours</option>
                                 </select>
-                            </div>
+                            </div> */}
 
                             {/* Description (Optional) */}
-                            <div>
+                            {/* <div>
                                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                                     Description (Optional)
                                 </label>
@@ -294,7 +292,7 @@ const CourseDetails = () => {
                                     rows={3}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Form Actions */}
                             <div className="flex items-center justify-end space-x-3 pt-4">
