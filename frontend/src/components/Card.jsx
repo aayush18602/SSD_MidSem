@@ -1,20 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
-import { updateQuestionStatus, deleteQuestion } from "../reducers/questions";
+import { updateQuestionStatus, updateQuestionPin, deleteQuestion } from "../reducers/questions";
 import ActionButtons from "./ActionButtons";
 import axios from "axios";
-import { useEffect } from "react";
 
 const ACCENT_KEYS = [
-  "pink",
-  "purple",
-  "red",
-  "blue",
-  "fuchsia",
-  "rose",
-  "violet",
-  "cyan",
-  "sky",
-  "teal",
+  "pink", "purple", "red", "blue", "fuchsia", 
+  "rose", "violet", "cyan", "sky", "teal",
 ];
 
 const ACCENTS = {
@@ -114,69 +105,85 @@ function truncate(str, n = 12) {
 
 export default function Card({ item, isGridView = false }) {
   const dispatch = useDispatch();
-  const accentKey = pickAccentKey(item._id || item.question);
+  const accentKey = pickAccentKey(item.questionId || item.question);
   const accent = ACCENTS[accentKey];
   const user = useSelector((state) => state.user);
-
-  const handleDelete = async() => {
-    try{
-      console.log(item);
+  const lectureId = useSelector((state) => state.questions.lecture_id);
+  const handleDelete = async () => {
+    try {
+      console.log("Deleting question:", item);
       const response = await axios({
-        method: "POST",
-        url: `http://localhost:3000/api/deleteQues/` + item.questionId,
+        method: "POST", // Use DELETE method for deletion
+        url: `http://localhost:3000/api/deleteQues/${item.questionId}`,
         headers: {
           "Authorization": `Bearer ${user.token}`,
           "Content-Type": "application/json",
         },
-        data: {},
-      })
-      const data = response.data;
+        data:{
+          lectureId: lectureId
+        }
+      });
+      
+      console.log("Delete response:", response.data);
       dispatch(deleteQuestion(item.questionId));
-    }
-    catch(err){
-      console.log(err);
+    } catch (err) {
+      console.error("Error deleting question:", err);
     }
   };
 
   const handleAnswered = async () => {
-    // const newStatus = item.status === "important" ? "important" : "answered";
-    const newStatus = "answered";
-    try{
-      console.log(item);
+    const newStatus = item.status === "answered" ? "unanswered" : "answered";
+    
+    try {
+      console.log("Updating question status:", item.questionId, newStatus);
       const response = await axios({
-        method: "POST",
-        url: `http://localhost:3000/api/updateQues/` + item.questionId,
+        method: "POST", // Use PATCH for updates
+        url: `http://localhost:3000/api/updateQues/${item.questionId}`,
         headers: {
           "Authorization": `Bearer ${user.token}`,
           "Content-Type": "application/json",
         },
-        data: { status: newStatus },
-      })
-      const data = response.data;
-      dispatch(updateQuestionStatus({ questionId: item.questionId, status: newStatus }));
-    }
-    catch(err){
-      console.log(err);
+        data: { 
+          status: newStatus,
+          answeredAt: newStatus === "answered" ? new Date().toISOString() : null
+        },
+      });
+      
+      console.log("Status update response:", response.data);
+      dispatch(updateQuestionStatus({ 
+        questionId: item.questionId, 
+        status: newStatus,
+        answeredOn: newStatus === "answered" ? new Date().toISOString() : null
+      }));
+    } catch (err) {
+      console.error("Error updating question status:", err);
     }
   };
 
-  const handleImportant = async() => {
-    const newStatus = item.status === "important" ? "unanswered" : "important";
-    try{
+  const handleImportant = async () => {
+    const newPinnedStatus = !item.isPinned;
+    
+    try {
+      console.log("Updating question pin status:", item.questionId, newPinnedStatus);
       const response = await axios({
-        method: "POST",
-        url: `http://localhost:3000/api/updateQues/` + item.questionId,
+        method: "POST", // Use PATCH for updates
+        url: `http://localhost:3000/api/pinnedQues/${item.questionId}`,
         headers: {
           "Authorization": `Bearer ${user.token}`,
           "Content-Type": "application/json",
         },
-        data: { status: newStatus },
-      })
-      const data = response.data;
-      dispatch(updateQuestionStatus({ questionId: item.questionId, status: newStatus }));
-    }
-    catch(err){
-      console.log(err);
+        data: { 
+          isPinned: newPinnedStatus 
+        },
+      });
+      
+      console.log("Pin update response:", response.data);
+      dispatch(updateQuestionPin({ 
+        questionId: item.questionId, 
+        isPinned: newPinnedStatus 
+      }));
+    } catch (err) {
+      console.error("Error updating question pin status:", err);
     }
   };
 
@@ -197,17 +204,30 @@ export default function Card({ item, isGridView = false }) {
         </p>
       </section>
 
-      {/* Other Info */}
+      {/* Action section - only show for instructors */}
       {user.role === "instructor" && (
         <section
           className={`h-14 flex-shrink-0 px-4 py-2 text-xs flex items-center justify-between ${accent.section}`}
         >
           <div className="min-w-0 flex flex-col justify-start items-start">
             <span className="truncate">by {truncate(item.authorName, 20)}</span>
+            <div className="flex gap-1 mt-1">
+              {item.status === "answered" && (
+                <span className="text-[10px] bg-green-200 text-green-800 px-1 py-0.5 rounded">
+                  Answered
+                </span>
+              )}
+              {item.isPinned && (
+                <span className="text-[10px] bg-yellow-200 text-yellow-800 px-1 py-0.5 rounded">
+                  Pinned
+                </span>
+              )}
+            </div>
           </div>
           <ActionButtons
             accentKey={accentKey}
             status={item.status}
+            isPinned={item.isPinned}
             onDelete={handleDelete}
             onAnswered={handleAnswered}
             onImportant={handleImportant}

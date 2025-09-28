@@ -19,16 +19,15 @@ const questionsSlice = createSlice({
     setLecture: (state, action) => {
       state.lecture_id = action.payload.lecture_id;
       state.lecture_name = action.payload.lecture_name;
-      console.log(state.lecture_id);
+      console.log("Set lecture ID:", state.lecture_id);
     },
 
     addQuestion: (state, action) => {
       state.questions.push(action.payload);
     },
-    updateQuestion: (state, action) => {
-      // update entire question object if the new object has with same id has been passed
-      const questionId = action.payload._id;
 
+    updateQuestion: (state, action) => {
+      const questionId = action.payload.questionId;
       const questionIndex = state.questions.findIndex(
         (q) => q.questionId === questionId
       );
@@ -39,40 +38,55 @@ const questionsSlice = createSlice({
           ...action.payload,
         };
       } else {
+        // If question doesn't exist, add it (for new questions)
         state.questions.push(action.payload);
       }
     },
 
     updateQuestionStatus: (state, action) => {
-      const { questionId, status } = action.payload;
+      const { questionId, status, answeredOn } = action.payload;
       const questionIndex = state.questions.findIndex(
         (q) => q.questionId === questionId
       );
       if (questionIndex !== -1) {
         state.questions[questionIndex].status = status;
+        if (answeredOn !== undefined) {
+          state.questions[questionIndex].answeredOn = answeredOn;
+        }
       }
     },
+
+    updateQuestionPin: (state, action) => {
+      const { questionId, isPinned } = action.payload;
+      const questionIndex = state.questions.findIndex(
+        (q) => q.questionId === questionId
+      );
+      if (questionIndex !== -1) {
+        state.questions[questionIndex].isPinned = isPinned;
+      }
+    },
+
     deleteQuestion: (state, action) => {
       const questionId = action.payload;
       state.questions = state.questions.filter(
         (q) => q.questionId !== questionId
       );
     },
+
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
+
     setError: (state, action) => {
       state.error = action.payload;
     },
+
     clearError: (state) => {
       state.error = null;
     },
+
     resetQuestions: (state) => {
       state.questions = [];
-      // state.loading = false;
-      // state.error = null;
-      // state.lecture_id = null;
-      // state.lecture_name = null;
     },
   },
 });
@@ -82,6 +96,7 @@ export const {
   addQuestion,
   updateQuestion,
   updateQuestionStatus,
+  updateQuestionPin, // New action for updating pin status
   deleteQuestion,
   setLoading,
   setError,

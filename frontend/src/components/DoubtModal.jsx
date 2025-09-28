@@ -1,9 +1,7 @@
 import { useEffect } from "react";
-import socket from "../socket";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { updateQuestion } from "../reducers/questions";
-// import {us}
+import { addQuestion } from "../reducers/questions";
 
 export default function DoubtModal({
   isOpen,
@@ -13,10 +11,12 @@ export default function DoubtModal({
 }) {
   const lectureId = useSelector((state) => state.questions.lecture_id);
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
   useEffect(() => {
     console.log("Lecture ID in Modal:", lectureId);
   }, [lectureId]);
-  const user = useSelector((state) => state.user);
+
   // Handle ESC key to close modal
   useEffect(() => {
     const handleEscape = (e) => {
@@ -40,48 +40,62 @@ export default function DoubtModal({
 
   // Handle form submission
   const handleSubmit = async () => {
-    doubtText = doubtText.trim();
+    const trimmedDoubtText = doubtText.trim();
+    
+    if (!trimmedDoubtText) {
+      alert("Please enter a question before submitting.");
+      return;
+    }
+
     try {
+      console.log("Submitting question to lecture:", lectureId);
       const response = await axios({
         method: "POST",
-        url: "http://localhost:3000/api/getQues/" + lectureId,
+        url: `http://localhost:3000/api/getQues/${lectureId}`,
         headers: {
           "Authorization": `Bearer ${user.token}`,
           "Content-Type": "application/json",
         },
         data: {
           quesObj: {
-            content: doubtText,
+            content: trimmedDoubtText,
             status: "unanswered",
             authorId: user._id,
-            authorName: user.fname,
-            createdAt: new Date(),
+            authorName: user.name || user.fname || "Anonymous", // Use available name field
+            createdAt: new Date().toISOString(),
             answeredAt: null,
             isPinned: false
           }
         },
-      })
+      });
+      
       const data = response.data;
-      console.log(data);
-      const updatedQ = {
+      console.log("Question created:", data);
+      
+      // Create question object that matches the expected format
+      const newQuestion = {
         questionId: data._id,
         question: data.content,
         authorName: data.authorName,
         authorId: data.authorId,
         status: data.status,
-        createdOn: data.createdAt ? data.createdAt : new Date().toISOString(),
-        answeredOn: data.answeredAt ? data.answeredAt : new Date().toISOString(),
-        isPinned: data.isPinned? data.isPinned : false
+        createdOn: data.createdAt,
+        answeredOn: data.answeredAt,
+        isPinned: data.isPinned || false
       };
-      dispatch(updateQuestion(updatedQ));
+      
+      // Use addQuestion instead of updateQuestion for new questions
+      dispatch(addQuestion(newQuestion));
+      
+      // Reset form and close modal
+      setDoubtText("");
+      onClose();
+      
     } catch (error) {
-      console.error(error);
+
+      console.error("Error submitting question:", error);
+      alert(error.response.data.err || "An issue occured");
     }
-
-
-    // Reset form and close modal
-    setDoubtText("");
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -125,11 +139,12 @@ export default function DoubtModal({
             placeholder="Type your question or doubt here..."
             className="w-full h-32 p-4 border border-slate-300 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
             autoFocus
+            maxLength={500}
           />
 
           {/* Character count */}
           <div className="mt-2 text-sm text-slate-500 text-right">
-            {doubtText.length} characters
+            {doubtText.length}/500 characters
           </div>
         </div>
 

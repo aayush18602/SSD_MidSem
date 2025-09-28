@@ -7,7 +7,7 @@ const Lecture = ({ lecture}) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const onLectureClick = (lectureId, lectureName) => {
-        console.log(lectureId);
+        console.log(lecture);
         dispatch(setLecture({ lecture_id: lectureId, lecture_name: lectureName }));
         navigate(`/doubts/${lectureId}`);
     }
@@ -29,7 +29,10 @@ const Lecture = ({ lecture}) => {
           <div className="flex items-center text-sm text-gray-600 space-x-4 mb-2">
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />
-              <span>{new Date(lecture.createdAt).toLocaleDateString("en-GB", {
+              {/* if empty date, show current date
+               */}
+              
+              <span>{new Date(lecture.lectureDate || Date.now()).toLocaleDateString("en-GB", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",

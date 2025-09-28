@@ -63,18 +63,14 @@ function IconButton({ title, ariaLabel, className, onClick, children }) {
   );
 }
 
-// Static accent map to ensure Tailwind keeps these classes
 const ACCENT_BUTTON_STYLES = {
   pink: "border border-pink-100 hover:border-pink-300 bg-pink-100 text-pink-800 hover:bg-pink-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
-  purple:
-    "border border-purple-100 hover:border-purple-300 bg-purple-100 text-purple-800 hover:bg-purple-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
+  purple: "border border-purple-100 hover:border-purple-300 bg-purple-100 text-purple-800 hover:bg-purple-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
   red: "border border-red-100 hover:border-red-300 bg-red-100 text-red-800 hover:bg-red-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
   blue: "border border-blue-100 hover:border-blue-300 bg-blue-100 text-blue-800 hover:bg-blue-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
-  fuchsia:
-    "border border-fuchsia-100 hover:border-fuchsia-300 bg-fuchsia-100 text-fuchsia-800 hover:bg-fuchsia-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
+  fuchsia: "border border-fuchsia-100 hover:border-fuchsia-300 bg-fuchsia-100 text-fuchsia-800 hover:bg-fuchsia-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
   rose: "border border-rose-100 hover:border-rose-300 bg-rose-100 text-rose-800 hover:bg-rose-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
-  violet:
-    "border border-violet-100 hover:border-violet-300 bg-violet-100 text-violet-800 hover:bg-violet-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
+  violet: "border border-violet-100 hover:border-violet-300 bg-violet-100 text-violet-800 hover:bg-violet-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
   cyan: "border border-cyan-100 hover:border-cyan-300 bg-cyan-100 text-cyan-800 hover:bg-cyan-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
   sky: "border border-sky-100 hover:border-sky-300 bg-sky-100 text-sky-800 hover:bg-sky-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
   teal: "border border-teal-100 hover:border-teal-300 bg-teal-100 text-teal-800 hover:bg-teal-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors",
@@ -83,56 +79,71 @@ const ACCENT_BUTTON_STYLES = {
 export default function ActionButtons({
   accentKey,
   status,
+  isPinned,
   onDelete,
   onAnswered,
   onImportant,
 }) {
-  const accentClass =
-    ACCENT_BUTTON_STYLES[accentKey] || ACCENT_BUTTON_STYLES.blue;
+  const accentClass = ACCENT_BUTTON_STYLES[accentKey] || ACCENT_BUTTON_STYLES.blue;
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <div className="flex items-center gap-2">
-      {/* Mark as Answered - only show if not already answered or important and not in delete confirmation */}
-      {status !== "answered" && status !== "important" && !confirmDelete && (
+      {/* Mark as Answered/Unanswered button - always show, different icons based on status */}
+      {!confirmDelete && (
         <IconButton
-          title="Mark as Answered"
-          ariaLabel="Mark as Answered"
+          title={status === "answered" ? "Mark as Unanswered" : "Mark as Answered"}
+          ariaLabel={status === "answered" ? "Mark as Unanswered" : "Mark as Answered"}
           onClick={onAnswered}
           className={accentClass}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-4"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m4.5 12.75 6 6 9-13.5"
-            />
-          </svg>
+          {status === "answered" ? (
+            // Undo icon for answered questions
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
+              />
+            </svg>
+          ) : (
+            // Check icon for unanswered questions
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m4.5 12.75 6 6 9-13.5"
+              />
+            </svg>
+          )}
         </IconButton>
       )}
 
-      {/* Mark as Important - always show, filled if status is important, hidden during delete confirmation */}
+      {/* Pin/Unpin button - always show, filled if pinned */}
       {!confirmDelete && (
         <IconButton
-          title={
-            status === "important" ? "Remove from Important" : "Mark as Important"
-          }
-          ariaLabel={
-            status === "important" ? "Remove from Important" : "Mark as Important"
-          }
+          title={isPinned ? "Unpin Question" : "Pin as Important"}
+          ariaLabel={isPinned ? "Unpin Question" : "Pin as Important"}
           onClick={onImportant}
           className={accentClass}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            fill={status === "important" ? "currentColor" : "none"}
+            fill={isPinned ? "currentColor" : "none"}
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
@@ -147,7 +158,7 @@ export default function ActionButtons({
         </IconButton>
       )}
 
-      {/* Delete → Confirm/Cancel with width expand + crossfade/slide */}
+      {/* Delete confirmation buttons */}
       <span
         className={`relative inline-flex items-center overflow-visible h-10 py-1 transition-all duration-200 ease-out ${
           confirmDelete ? "w-[4.75rem]" : "w-9"
@@ -192,7 +203,7 @@ export default function ActionButtons({
               : "translate-x-full opacity-0 pointer-events-none"
           }`}
         >
-          {/* Confirm */}
+          {/* Confirm Delete */}
           <IconButton
             title="Confirm Delete"
             ariaLabel="Confirm Delete"

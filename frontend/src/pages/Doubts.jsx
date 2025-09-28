@@ -6,6 +6,8 @@ import Card from "../components/Card";
 import Header from "../components/Header";
 import socket from "../socket";
 import axios from "axios";
+import Navbar from "../components/Navbar";
+import Loading from "../components/Loading";
 
 function Column({ title, items = [] }) {
   return (
@@ -19,7 +21,7 @@ function Column({ title, items = [] }) {
 
       <div className="flex-1 overflow-y-auto pr-2 space-y-6 scrollbar-hide">
         {items.map((it) => (
-          <Card key={it._id} item={it} />
+          <Card key={it.questionId} item={it} />
         ))}
       </div>
     </div>
@@ -52,7 +54,7 @@ function SingleViewContainer({ title, items = [] }) {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max">
           {items.map((item) => (
-            <Card key={item._id} item={item} isGridView={true} />
+            <Card key={item.questionId} item={item} isGridView={true} />
           ))}
         </div>
       </div>
@@ -64,87 +66,73 @@ export default function Doubts() {
   const dispatch = useDispatch();
   const questions = useSelector((state) => state.questions.questions);
   const user = useSelector((state) => state.user);
-
-  // extract lectureId from URL url/doubts/:lectureId
-  // const lectureId = window.location.pathname.split("/").pop();
   const lectureId = useSelector((state) => state.questions.lecture_id);
-
   const [activeView, setActiveView] = useState("kanban");
+  const [isLoading, setIsLoading] = useState(true);
+  // Load questions from API
+  useEffect(() => {
+    const loadQuestions = async () => {
+      if (!lectureId || !user.token) return;
 
-  // Load demo data into Redux store on component mount
-  useEffect(async ()=> {
-    // dispatch(setQuestions(demoData));
-    // dispatch(resetQuestions()); // clear previous questions
-    // socket.emit("joinLecture", lectureId);
-
-    // socket.on("getLectureQuestions", (data) => {
-    //   // change the data format to match the redux store
-    //   data.questions = data.questions.map((q) => ({
-    //     _id: q._id,
-    //     question: q.content,
-    //     authorName: q.authorName,
-    //     authorId: q.authorId,
-    //     status: q.status,
-    //     createdOn: q.createdAt ? q.createdAt : new Date().toISOString(),
-    //     answeredOn: q.answeredAt ? q.answeredAt : new Date().toISOString(),
-    //   }));
-
-
-    //   dispatch(setQuestions(data.questions));
-    // });
+      try {
+        setIsLoading(true);
+        const response = await axios({
+          method: 'GET',
+          url: `http://localhost:3000/api/getQues/${lectureId}`,
+          headers: {
+            'Authorization': `Bearer ${user.token}`
+          }
+        });
+        
+        const data = response.data;
+        console.log("Loaded questions:", data);
+        
+        const questions = data.questions.map((q) => ({
+          questionId: q._id,
+          question: q.content,
+          authorName: q.authorName,
+          authorId: q.authorId,
+          status: q.status, // "answered" or "unanswered"
+          createdOn: q.createdAt ? q.createdAt : new Date().toISOString(),
+          answeredOn: q.answeredAt ? q.answeredAt : null,
+          isPinned: q.isPinned || false // separate field for importance
+        }));
+        
+        dispatch(setQuestions(questions));
+      } catch (error) {
+        console.error("Error loading questions:", error);
+      }
+      finally {
+        setIsLoading(false);
+      }
+    };
     
-    // socket.on("getUpdatedQuestion", (data) => {
-    //   console.log("Received updated question:", data);
-    //   const updatedQ = {
-    //     _id: data._id,
-    //     question: data.content,
-    //     authorName: data.authorName,
-    //     authorId: data.authorId,
-    //     status: data.status,
-    //     createdOn: data.createdAt ? data.createdAt : new Date().toISOString(),
-    //     answeredOn: data.answeredAt ? data.answeredAt : new Date().toISOString(),
-    //   };
-    //   dispatch(updateQuestion(updatedQ));
-    // })
-    try {
-      const response = await axios({
-        method: 'GET',
-        url: `http://localhost:3000/api/getQues/${lectureId}`,
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
-      });
-      const data = response.data;
-      console.log(data);
-      const questions = data.questions.map((q) => ({
-        questionId: q._id,
-        question: q.content,
-        authorName: q.authorName,
-        authorId: q.authorId,
-        status: q.status,
-        createdOn: q.createdAt ? q.createdAt : new Date().toISOString(),
-        answeredOn: q.answeredAt ? q.answeredAt : new Date().toISOString(),
-        isPinned: q.isPinned? q.isPinned : false
-      }));
-      dispatch(setQuestions(questions));
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
+    loadQuestions();
+  }, [lectureId, user.token, dispatch]);
 
-  // Filter data based on status
+  // Fixed filter functions - now properly separate status and isPinned
   const getFilteredData = (filterType) => {
     switch (filterType) {
       case "unanswered":
+        // Only questions that are unanswered (regardless of pin status)
         return questions.filter((item) => item.status === "unanswered");
+      
       case "answered":
-        return questions.filter((item) => item.status === "answered");
+        // Only questions that are answered AND not pinned (to avoid duplicates with important)
+        return questions.filter((item) => item.status === "answered" && !item.isPinned);
+      
       case "important":
-        return questions.filter((item) => item.status === "important");
-      case "notimportant":
-        return questions.filter((item) => item.status !== "important");
+        // Only pinned questions (regardless of answered status)
+        return questions.filter((item) => item.isPinned === true);
+      
       case "userasked":
+        // Questions asked by current user
         return questions.filter((item) => item.authorId === user._id);
+      
+      case "all":
+        // All questions that are not pinned (to avoid duplicates)
+        return questions.filter((item) => !item.isPinned);
+      
       default:
         return questions;
     }
@@ -155,12 +143,13 @@ export default function Doubts() {
       return (
         <div className="h-full grid grid-cols-1 md:grid-cols-3 gap-6">
           <Column title="Your Doubts" items={getFilteredData("userasked")} />
-          <Column title="All" items={getFilteredData("notimportant")} />
+          <Column title="All Questions" items={getFilteredData("all")} />
           <Column title="Important" items={getFilteredData("important")} />
         </div>
       );
     }
 
+    // Instructor view
     switch (activeView) {
       case "kanban":
         return (
@@ -198,8 +187,14 @@ export default function Doubts() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 overflow-hidden">
+      <Navbar />
+      {isLoading ? <Loading />:
+      <>
       <Header activeView={activeView} onViewChange={setActiveView} />
       <main className="h-[90vh] p-6 overflow-hidden">{renderContent()}</main>
+      </>
+      }
+      
     </div>
   );
 }

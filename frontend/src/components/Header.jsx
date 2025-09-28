@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { use, useState } from "react";
 import { useDispatch, useSelector } from "react-redux"
 import { addQuestion } from "../reducers/questions";
 import DoubtModal from "./DoubtModal";
+// import { useSelector } from "react-redux";
 
 export default function Header({ activeView, onViewChange}) {
   const dispatch = useDispatch();
@@ -19,7 +20,8 @@ export default function Header({ activeView, onViewChange}) {
   ];
 
   const activeIndex = tabs.findIndex((tab) => tab.id === activeView);
-
+  const lecture_name = useSelector((state) => state.questions.lecture_name);
+  const course_name = useSelector((state) => state.course.name);
   // Handle doubt submission
   const handleSubmitDoubt = (doubt) => {
     // Create new question object
@@ -49,7 +51,7 @@ export default function Header({ activeView, onViewChange}) {
       <header className="h-[10vh] bg-gradient-to-r from-slate-50 via-white to-slate-50 backdrop-blur-sm border-b border-slate-200/60 flex items-center justify-between px-8">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-            SSD Lecture 14th June
+            {course_name} - {lecture_name}
           </h1>
         </div>
 
