@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux"
-import { addQuestion } from "../reducers/questionsSlice";
+import { addQuestion } from "../reducers/questions";
 import DoubtModal from "./DoubtModal";
 
 export default function Header({ activeView, onViewChange}) {

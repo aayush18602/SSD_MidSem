@@ -5,11 +5,11 @@ const questionSchema = new mongoose.Schema({
   status: String,
   answer: String,
   isPinned: Boolean,
-  author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }
-}, { collection: "Questions", timestamps: true });
+  authorId: String,
+  authorName: String,
+  createdAt: Date,
+  answeredAt: Date,
+}, { collection: "Questions" });
 
 const Question = mongoose.model("Question", questionSchema);
 

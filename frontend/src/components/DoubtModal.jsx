@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import socket from "../socket";
+import { useSelector } from "react-redux";
 
 export default function DoubtModal({
   isOpen,
@@ -6,6 +8,11 @@ export default function DoubtModal({
   doubtText,
   setDoubtText,
 }) {
+  const lectureId = useSelector((state) => state.questions.lecture_id);
+  useEffect(() => {
+    console.log("Lecture ID in Modal:", lectureId);
+  }, [lectureId]);
+  const user = useSelector((state) => state.user);
   // Handle ESC key to close modal
   useEffect(() => {
     const handleEscape = (e) => {
@@ -31,7 +38,20 @@ export default function DoubtModal({
   const handleSubmit = () => {
     doubtText = doubtText.trim();
 
-    console.log("Submitting doubt:", doubtText);
+    socket.emit("createQuestion", {
+      lectureId: lectureId,
+      quesObj:{
+        content: doubtText,
+        status: "unanswered",
+        authorId: user._id,
+        authorName: user.fname,
+        createdAt: new Date(),
+        answeredAt: null,
+      }
+      
+    });
+
+
     // Reset form and close modal
     setDoubtText("");
     onClose();

@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { updateQuestionStatus, deleteQuestion } from "../reducers/questionsSlice";
+import { updateQuestionStatus, deleteQuestion } from "../reducers/questions";
 import ActionButtons from "./ActionButtons";
 
 const ACCENT_KEYS = [
@@ -128,8 +128,6 @@ export default function Card({ item, isGridView = false }) {
     const newStatus = item.status === "important" ? "unanswered" : "important";
     dispatch(updateQuestionStatus({ questionId: item.questionId, status: newStatus }));
   };
-
-  const role = "instructor"; // Change this to "instructor" to see instructor view
 
   return (
     <div

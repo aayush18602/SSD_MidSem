@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setQuestions } from "../reducers/questionsSlice";
+import { resetQuestions, setQuestions, updateQuestion } from "../reducers/questions";
 import { demoData } from "../data";
-import Card from "./Card";
-import Header from "./Header";
+import Card from "../components/Card";
+import Header from "../components/Header";
+import socket from "../socket";
 
 function Column({ title, items = [] }) {
   return (
@@ -63,11 +64,47 @@ export default function Doubts() {
   const questions = useSelector((state) => state.questions.questions);
   const user = useSelector((state) => state.user);
 
+  // extract lectureId from URL url/doubts/:lectureId
+  // const lectureId = window.location.pathname.split("/").pop();
+  const lectureId = useSelector((state) => state.questions.lecture_id);
+
   const [activeView, setActiveView] = useState("kanban");
 
   // Load demo data into Redux store on component mount
-  useEffect(() => {
-    dispatch(setQuestions(demoData));
+  useEffect(()=> {
+    // dispatch(setQuestions(demoData));
+    // dispatch(resetQuestions()); // clear previous questions
+    socket.emit("joinLecture", lectureId);
+
+    socket.on("getLectureQuestions", (data) => {
+      // change the data format to match the redux store
+      data.questions = data.questions.map((q) => ({
+        _id: q._id,
+        question: q.content,
+        authorName: q.authorName,
+        authorId: q.authorId,
+        status: q.status,
+        createdOn: q.createdAt ? q.createdAt : new Date().toISOString(),
+        answeredOn: q.answeredAt ? q.answeredAt : new Date().toISOString(),
+      }));
+
+
+      dispatch(setQuestions(data.questions));
+    });
+    
+    socket.on("getUpdatedQuestion", (data) => {
+      console.log("Received updated question:", data);
+      const updatedQ = {
+        _id: data._id,
+        question: data.content,
+        authorName: data.authorName,
+        authorId: data.authorId,
+        status: data.status,
+        createdOn: data.createdAt ? data.createdAt : new Date().toISOString(),
+        answeredOn: data.answeredAt ? data.answeredAt : new Date().toISOString(),
+      };
+      dispatch(updateQuestion(updatedQ));
+    })
   }, [dispatch]);
 
   // Filter data based on status
@@ -92,18 +129,9 @@ export default function Doubts() {
     if (user.role === "student") {
       return (
         <div className="h-full grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Column
-            title="Your Doubts"
-            items={getFilteredData("userasked")}
-          />
-          <Column
-            title="All"
-            items={getFilteredData("notimportant")}
-          />
-          <Column
-            title="Important"
-            items={getFilteredData("important")}
-          />
+          <Column title="Your Doubts" items={getFilteredData("userasked")} />
+          <Column title="All" items={getFilteredData("notimportant")} />
+          <Column title="Important" items={getFilteredData("important")} />
         </div>
       );
     }
@@ -145,10 +173,7 @@ export default function Doubts() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 overflow-hidden">
-      <Header
-        activeView={activeView}
-        onViewChange={setActiveView}
-      />
+      <Header activeView={activeView} onViewChange={setActiveView} />
       <main className="h-[90vh] p-6 overflow-hidden">{renderContent()}</main>
     </div>
   );

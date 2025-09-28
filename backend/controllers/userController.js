@@ -75,6 +75,7 @@ export const loginUser = async (req, res) => {
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
         _id: user.id,
+        fname: user.fname,
         email: user.email,
         role: user.role,
         token: generateToken(user),

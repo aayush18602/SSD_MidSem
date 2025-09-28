@@ -5,6 +5,7 @@ const initialState = {
   email: null,
   role: null,
   token: null,
+  fname: null,
 }
 
 export const userSlice = createSlice({
@@ -16,12 +17,14 @@ export const userSlice = createSlice({
       state.email = action.payload.email
       state.role = action.payload.role
       state.token = action.payload.token
+      state.fname = action.payload.fname
     },
     resetUserDetails: (state) => {
       state._id = null
       state.email = null
       state.role = null
       state.token = null
+      state.fname = null
     },
   },
 })
