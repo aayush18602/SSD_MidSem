@@ -1,11 +1,29 @@
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { setUserDetails } from "../reducers/user";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:3000/auth/login", { email, password });
+      const data = response.data;
+      console.log(data);
+      dispatch(setUserDetails(data));
+      console.log(user);
+      navigate('/');
+    } catch (error) {
+      console.error(error);
+      alert("Login failed. Please check your credentials.");
+    }
     console.log("Email:", email);
     console.log("Password:", password);
   };

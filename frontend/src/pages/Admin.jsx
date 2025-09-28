@@ -1,13 +1,13 @@
-import { useState } from "react";
-
-const availableCourses = [
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Computer Science",
-  "English",
-];
+import { useEffect, useState } from "react";
+import axios from "axios";
+// const availableCourses = [
+//   "Mathematics",
+//   "Physics",
+//   "Chemistry",
+//   "Biology",
+//   "Computer Science",
+//   "English",
+// ];
 
 export default function SignUp() {
   const [firstName, setFirstName] = useState("");
@@ -16,9 +16,36 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("Student");
   const [selectedCourses, setSelectedCourses] = useState([]);
+  const [availableCourses, setAvailableCourses] = useState([]);
 
-  const handleSubmit = (e) => {
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/courses");
+        setAvailableCourses(response.data);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+    fetchCourses();
+  })
+  const handleSubmit = async (e) => {
     e.preventDefault();
+     const selectedCourseIds = selectedCourses.map((c) => c._id);
+    const response = await axios({
+      method: "POST",
+      url: "http://localhost:3000/auth/users",
+      data: {
+        fname: firstName,
+        lname: lastName,
+        email: email,
+        password: password,
+        role: role.toLowerCase(),
+        courseIds: selectedCourseIds,
+      },
+    });
+    console.log(response.data);
     console.log({
       firstName,
       lastName,
@@ -29,14 +56,16 @@ export default function SignUp() {
     });
   };
 
-  const handleCourseSelect = (course) => {
-    if (!selectedCourses.includes(course)) {
+  const handleCourseSelect = (courseId) => {
+    const course = availableCourses.find((c) => c._id === courseId);
+    if (course && !selectedCourses.some((c) => c._id === courseId)) {
       setSelectedCourses([...selectedCourses, course]);
     }
+
   };
 
   const removeCourse = (course) => {
-    setSelectedCourses(selectedCourses.filter((c) => c !== course));
+    setSelectedCourses(selectedCourses.filter((c) => c._id !== course));
   };
 
   const remainingCourses = availableCourses.filter(
@@ -163,13 +192,13 @@ export default function SignUp() {
             <div className="flex flex-wrap gap-2 mb-2">
               {selectedCourses.map((course) => (
                 <span
-                  key={course}
+                  key={course._id}
                   className="flex items-center bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-sm"
                 >
-                  {course}
+                  {course.name}
                   <button
                     type="button"
-                    onClick={() => removeCourse(course)}
+                    onClick={() => removeCourse(course._id)}
                     className="ml-1 font-bold text-indigo-600 hover:text-indigo-900"
                   >
                     ×
@@ -186,10 +215,10 @@ export default function SignUp() {
                 Select a course
               </option>
               {availableCourses
-                .filter((course) => !selectedCourses.includes(course))
+                .filter((course) => !selectedCourses.some((c) => c._id === course._id))
                 .map((course) => (
-                  <option key={course} value={course}>
-                    {course}
+                  <option key={course._id} value={course._id}>
+                    {course.name}
                   </option>
                 ))}
             </select>
