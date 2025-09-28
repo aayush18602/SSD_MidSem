@@ -31,9 +31,9 @@ export async function getAllLectures(req,res) {
 export async function createLectureForCourse(req, res) {
   try {
     const { courseId } = req.params;
-    const { name } = req.body;
+    const { name,lectureDate } = req.body;
 
-    const newLecture = new Lecture({ name, questions: [] });
+    const newLecture = new Lecture({ name, questions: [],lectureDate });
     await newLecture.save();
 
     const course = await Course.findById(courseId);

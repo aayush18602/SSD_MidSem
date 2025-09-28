@@ -7,7 +7,8 @@ const lectureSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Question"
     }
-  ]
+  ],
+  lectureDate: Date
 }, { collection: "Lectures",timestamps: true });
 
 const Lecture = mongoose.model("Lecture", lectureSchema);
