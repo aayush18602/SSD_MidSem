@@ -113,6 +113,11 @@ export async function getQuestionForLecture(req,res){
 export async function createQuestion(req,res){
   const { lectureId } = req.params;
   const {quesObj} = req.body;
+  const content = quesObj.content;
+  const exists = await Question.exists({content: content});
+  if(exists){
+    return res.status(400).json({err: "Question Already exists"})
+  }
   const ques = new Question(quesObj);
   await ques.save();
   const lecture = await Lecture.findById(lectureId);
