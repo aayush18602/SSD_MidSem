@@ -130,3 +130,9 @@ export async function updateQuestion(req,res){
   },{new:true});
   return res.status(201).json(ques);
 }
+
+export async function deleteQuestion(req,res){
+  const { quesId } = req.params;
+  const ques = await Question.findByIdAndDelete(quesId);
+  return res.status(201).json(ques);
+}
