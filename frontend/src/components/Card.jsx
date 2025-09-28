@@ -205,7 +205,7 @@ export default function Card({ item, isGridView = false }) {
       </section>
 
       {/* Action section - only show for instructors */}
-      {user.role === "instructor" && (
+      
         <section
           className={`h-14 flex-shrink-0 px-4 py-2 text-xs flex items-center justify-between ${accent.section}`}
         >
@@ -224,6 +224,7 @@ export default function Card({ item, isGridView = false }) {
               )}
             </div>
           </div>
+        {user.role === "instructor" && (
           <ActionButtons
             accentKey={accentKey}
             status={item.status}
@@ -232,8 +233,9 @@ export default function Card({ item, isGridView = false }) {
             onAnswered={handleAnswered}
             onImportant={handleImportant}
           />
-        </section>
+        
       )}
+      </section>
     </div>
   );
 }
