@@ -93,8 +93,8 @@ export default function ActionButtons({
 
   return (
     <div className="flex items-center gap-2">
-      {/* Mark as Answered - only show if not already answered or important */}
-      {status !== "answered" && status !== "important" && (
+      {/* Mark as Answered - only show if not already answered or important and not in delete confirmation */}
+      {status !== "answered" && status !== "important" && !confirmDelete && (
         <IconButton
           title="Mark as Answered"
           ariaLabel="Mark as Answered"
@@ -118,32 +118,34 @@ export default function ActionButtons({
         </IconButton>
       )}
 
-      {/* Mark as Important - always show, filled if status is important */}
-      <IconButton
-        title={
-          status === "important" ? "Remove from Important" : "Mark as Important"
-        }
-        ariaLabel={
-          status === "important" ? "Remove from Important" : "Mark as Important"
-        }
-        onClick={onImportant}
-        className={accentClass}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill={status === "important" ? "currentColor" : "none"}
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="size-4"
+      {/* Mark as Important - always show, filled if status is important, hidden during delete confirmation */}
+      {!confirmDelete && (
+        <IconButton
+          title={
+            status === "important" ? "Remove from Important" : "Mark as Important"
+          }
+          ariaLabel={
+            status === "important" ? "Remove from Important" : "Mark as Important"
+          }
+          onClick={onImportant}
+          className={accentClass}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"
-          />
-        </svg>
-      </IconButton>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill={status === "important" ? "currentColor" : "none"}
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="size-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"
+            />
+          </svg>
+        </IconButton>
+      )}
 
       {/* Delete → Confirm/Cancel with width expand + crossfade/slide */}
       <span
@@ -211,7 +213,7 @@ export default function ActionButtons({
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                d="m4.5 12.75 6 6 9-13.5"
               />
             </svg>
           </IconButton>
@@ -233,7 +235,7 @@ export default function ActionButtons({
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                d="M6 18 18 6M6 6l12 12"
               />
             </svg>
           </IconButton>
