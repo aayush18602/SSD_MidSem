@@ -16,6 +16,7 @@ SSD_MidSem-feat-lecture-page/
 │   ├─ controllers/  # Business logic (course, user)
 │   ├─ models/       # Mongoose schemas (User, Courses, Lectures, Questions)
 │   └─ routes/       # API endpoints
+|   └─ .env          # Environment Variables
 │
 └─ frontend/         # Client-side React app
     ├─ src/
@@ -24,8 +25,8 @@ SSD_MidSem-feat-lecture-page/
     │   └─ store.js      # State management (if needed)
     └─ index.html
 ```
-
----
+## Note: We have not added .env files in repo as well as submission
+To run the backend please create a .env file in backend directory and add 3 variables **PORT , MONGO_URI , JWT_SECRET**
 
 ## ⚡ Workflow
 
